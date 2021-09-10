@@ -26,26 +26,68 @@ met <- data.table::fread("met_all.gz")
  ##step 2 
 ```{r}
 dim(met)
+head(met, n=1)
+tail(met)
 ```
  
-
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+## Step3:take a look at the variables
+```{r}
+str(met)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+##Step4 
+```{r}
+#looking at categorical variables
+table(met$year)
+table(met$day)
+table(met$hour)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#looking at numerical variables
+summary(met$temp)
+summary(met$elev)
+summary(met$wind.sp)
+```
+
+```{r}
+met$elev[met$elev==9999.0] <- NA
+#or
+# met[elev == 9999.0, elev:= NA]
+summary(met$elev)
+```
+
+The highest weather station is at `r max(met$elev, na.rm=TRUE)` 
+Now we need to fix the temperature and summarize!
+
+```{r}
+met <- met[temp>-15][order(temp)]
+summary(met[, .(lat, lon, wind.sp, temp, elev)])
+```
+##Step5
+:p
+
+## Step6 calculate summary statistics
+```{r}
+met[elev==max(elev, na.rm =TRUE)][, summary(wind.sp)]
+met[elev==max(elev, na.rm =TRUE)][, summary(temp)]
+```
+
+```{r}
+met[elev==max(elev, na.rm =TRUE), .(
+  temp_wind = cor(temp, wind.sp, use = "complete"),
+  temp_day = cor(temp, day, use = "complete"),
+  temp_hour = cor(temp, hour, use = "complete"),
+  wind_day = cor(wind.sp, day, use = "complete"),
+  wind_hour = cor(wind.sp, hour, use = "complete")
+)]
+```
+
+##Exploratory graphs
+
+```{r}
+hist(met$elev, breaks = 100)
+```
+
+
