@@ -70,8 +70,8 @@ summary(met[, .(lat, lon, wind.sp, temp, elev)])
 
 ## Step6 calculate summary statistics
 ```{r}
-met[elev==max(elev, na.rm =TRUE)][, summary(wind.sp)]
-met[elev==max(elev, na.rm =TRUE)][, summary(temp)]
+elev <- met[elev==max(elev)]
+summary(elev)
 ```
 
 ```{r}
@@ -88,6 +88,27 @@ met[elev==max(elev, na.rm =TRUE), .(
 
 ```{r}
 hist(met$elev, breaks = 100)
+```
+```{r}
+hist(met$temp)
+hist(met$wind.sp)
+
+```
+
+```{r}
+library(leaflet)
+leaflet(elev) %>%
+  addProviderTiles('OpenStreetMap') %>% 
+  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100)
+```
+```{r}
+library(lubridate)
+elev$date <- with(elev, ymd_h(paste(year, month, day, hour, sep= ' ')))
+summary(elev$date)
+```
+```{r}
+elev <- elev[order(date)]
+head(elev)
 ```
 
 
